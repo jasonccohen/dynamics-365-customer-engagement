@@ -88,4 +88,40 @@ analysis-results detail, and then select **Resolve**.
 
 Analysis-results details provide insights into the failure. In most cases, the failure occurs because the records are configured incorrectly.
 
+## Base Rules in Solution Health
 
+Solution Health provides a way to check on the current health of an organization. Seeing how many analysis jobs have been failing over time will provide a way to see how the state of an organization developed over time.
+
+
+We distinguish base rules that are provided by the solution health solution and custom rules that can be provided by consuming solutions. Custom rules are implemented by consuming solutions providing custom actions that they want to have called to check whether any known issues are present in the organization.
+
+In case a solution only wants to consume base rules, the only thing that has to be done is implementing code in packagedeployer in order to register that the solution wants to use those rules.
+
+The rules that are available as base rules are:
+- **Process Definitions in Draft Status** - Returns all Processes that are currently in draft status for the solution that is provided in the SolutionId parameter
+- **Disabled Sdk Message Processing Step**s - Returns all Sdk Message Processing Steps that are disabled for the solution that is provieded in the SolutionId parameter
+- **Customized Web Resources** - Returns a list of all webresources that are part of the provided solution that have been modified. Accepts a list of GUIDs as exclusions. This can be used to exclude patches from being flagged as customizations.
+- **Deleted Processes** - Accepts a SolutionId and an list of component GUIDs and flags the processes that have been deleted in the system
+- **Deleted Sdk Message Processing Steps** - Accepts a SolutionId and an list of component GUIDs and flags the sdk message processing steps that have been deleted by users
+- **Deleted Web Resources** - Accepts a SolutionId and an list of component GUIDs and flags the missing web resources
+- **Waiting Workflow instances Owned by Disabled Users** - Accepts a SolutionId as parameter, shows all waiting process instances that are owned by disabled users and will therefore fail to run correctly.
+- **Process Definitions Owned by Disabled Users** - Accepts a SolutionId as parameter, shows all process definitions that are owned by disabled users. For FieldService this case would break the upgrade, because it's not possible to deactivate and reactivate a workflow that is owned by a user without sufficient permissions.
+
+
+
+
+Each solution should implement custom rules, as appropriate.
+
+
+The entry point for the user is the Solution Health Hub AppModule. When the user creates a new Analysis Job there is a dialog where the user selects a RuleSet for which the solution check is supposed to be run.
+
+
+Field Service introduces the following rules on top of the existing base rules:
+- **Incomplete Field Service Upgrade** - Checks whether the upgrade has fully completed. Sometimes the metadata will successfully upgrade, the steps that run afterwards however encounter issues. This will be highlighted by this rule.
+- **Agreement Work Order Generation** - This rule checks whether all work orders that were supposed to be generated in the last seven (7) days have successfully been created.
+- **Missing form libraries** - This rule detects if there are forms that are referencing Field Service libraries, without setting the attributes correctly, which would lead to runtime problems.
+- **Field Service Booking Setup Metadata Configuration** - This rule checks whether the Field Service Booking Setup Metadata record exists as expected and also provides a resolution which creates the record with the correct values if it doesn't exist.
+- **Universal Resource Scheduling Version Compatibility Check** - This rule validates that the version of Field Service and Unified Resource Scheduling in the system are compatible to each other.
+
+
+The Solution Health solution takes care of calling all the Solution Health Rules that are associated with a RuleSet whenever an Analysis Job for that ruleset is triggered.
