@@ -26,7 +26,7 @@ search.app:
   - D365FS
 ---
 
-# Bug fixes
+# Bug fixescd
 
 In this article, you'll find an ongoing list of bug fixes for Dynamics 365 Field Service, Universal Resource Scheduling (URS), Field Service Mobile, resource scheduling optimization, and Connected Field Service (CFS). For information about other updates to Field Service, visit the [Dynamics 365 Release Plans](https://docs.microsoft.com/dynamics365/release-plans/). 
 
